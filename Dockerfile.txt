@@ -1,0 +1,15 @@
+# 使用Python的官方映像
+FROM python:3.8-slim
+
+# 設置工作目錄
+WORKDIR /app
+
+# 複製需求文件並安裝依賴
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# 複製所有文件到工作目錄
+COPY . .
+
+# 指定啟動命令
+CMD ["python", "main.py"]
