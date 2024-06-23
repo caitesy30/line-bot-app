@@ -13,6 +13,9 @@ import os
 import threading
 import requests
 import time
+import pandas as pd
+import mplfinance as mpf
+from historical_data import get_klines_df
 
 # 從環境變數中獲取 channel_token 和 channel_secret
 channel_token = os.getenv('LINE_TOKEN')
@@ -73,6 +76,30 @@ def handle_message(event):
                     preview_image_url='https://picsum.photos/200/300'
                 )
             )
+        elif event.message.text == "K線圖":
+            # 生成K線圖
+            symbol = "BTCUSDT"
+            interval = "6h"
+            klines = get_klines_df(symbol, interval)
+            data = klines.copy()
+            data['floor'] = data.rolling(60)['low'].min().shift(1)
+            data['ceil'] = data.rolling(60)['high'].max().shift(1)
+            addp = []
+            addp.append(mpf.make_addplot(data['floor']))
+            addp.append(mpf.make_addplot(data['ceil']))
+            mcolor = mpf.make_marketcolors(up='r', down='g', inherit=True)
+            mstyle = mpf.make_mpf_style(base_mpf_style='yahoo', marketcolors=mcolor)
+            chart_path = 'chart.png'
+            mpf.plot(data, style=mstyle, addplot=addp, type='candle', savefig=chart_path)
+
+            # 發送K線圖
+            line_bot_api.reply_message(
+                event.reply_token,
+                ImageSendMessage(
+                    original_content_url=f'https://line-bot-app.onrender.com/{chart_path}',
+                    preview_image_url=f'https://line-bot-app.onrender.com/{chart_path}'
+                )
+            )
         else:
             line_bot_api.reply_message(
                 event.reply_token,
@@ -92,7 +119,7 @@ def run():
 def keep_alive():
     while True:
         try:
-            requests.get('https://your-replit-app-url.repl.co')
+            requests.get('https://line-bot-app.onrender.com')
         except Exception as e:
             app.logger.error(f"Keep-alive error: {str(e)}")
         time.sleep(600)  # 每10分鐘ping一次
