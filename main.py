@@ -5,7 +5,7 @@ Created on Fri Jun 21 09:30:56 2024
 @author: user
 """
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, send_file
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, StickerSendMessage, VideoSendMessage, AudioSendMessage, ImageSendMessage
@@ -111,6 +111,10 @@ def handle_message(event):
 @app.route("/")
 def index():
     return "Hello, this is the Line bot server."
+
+@app.route("/chart.png")
+def get_chart():
+    return send_file("chart.png", mimetype="image/png")
 
 def run():
     port = int(os.environ.get("PORT", 5000))
