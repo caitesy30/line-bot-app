@@ -2,6 +2,15 @@
 # https://hub.docker.com/_/python
 FROM python:3.8-slim
 
+# Install necessary build tools and dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    gfortran \
+    libatlas-base-dev \
+    libblas-dev \
+    liblapack-dev
+
 # Set the working directory to /app
 WORKDIR /app
 
